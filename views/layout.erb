@@ -104,6 +104,29 @@
         <% end %>
     </div>
 
+    <% if token_store.get_tokens(session.id) %>
+        <div class="status-card">
+            <h3>🔗 Connection Status</h3>
+            <% tokens = token_store.get_tokens(session.id) %>
+            <p><strong>Status:</strong> 
+                <% if token_store.token_expired?(tokens) %>
+                    <span style="color: #e74c3c;">Expired</span>
+                <% elsif token_store.token_expires_soon?(tokens) %>
+                    <span style="color: #f39c12;">Expires Soon</span>
+                <% else %>
+                    <span style="color: #27ae60;">Connected</span>
+                <% end %>
+            </p>
+            <p><strong>Connected:</strong> <%= Time.at(tokens['expires_at'] - tokens['expires_in'].to_i).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
+            <p><strong>Expires:</strong> <%= Time.at(tokens['expires_at']).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
+            <p><strong>Nation:</strong> <%= ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '') %></p>
+            <p><strong>Scope:</strong> <%= tokens['scope'] %></p>
+            <% if defined?(user_name) && user_name %>
+                <p><strong>User:</strong> <%= user_name %></p>
+            <% end %>
+        </div>
+    <% end %>
+
     <%= yield %>
 
     <div class="nav">

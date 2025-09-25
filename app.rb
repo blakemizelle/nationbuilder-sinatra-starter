@@ -137,7 +137,9 @@ get '/status' do
     erb :status, locals: {
       account_info: account_info,
       site_info: site_info,
-      tokens: tokens
+      tokens: tokens,
+      user_name: account_info['first_name'] && account_info['last_name'] ? "#{account_info['first_name']} #{account_info['last_name']}" : account_info['email'],
+      nation_slug: ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
     }
   rescue => e
     # If API call fails, clear tokens and redirect to login
