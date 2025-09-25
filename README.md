@@ -8,6 +8,7 @@ This app demonstrates:
 - **OAuth Login**: Users can connect their NationBuilder account
 - **Secure Token Handling**: Automatically manages access tokens and refresh
 - **API Integration**: Makes calls to NationBuilder's API to get user data
+- **Multi-Tenant Support**: Handles multiple users from different NationBuilder instances
 - **Production Ready**: Can be deployed to Heroku with Redis for scaling
 
 ## How It Works
@@ -19,6 +20,20 @@ This app demonstrates:
 5. You can now make API calls to get their NationBuilder data
 
 The app uses PKCE (Proof Key for Code Exchange) for security, which is the modern standard for OAuth apps.
+
+## Multi-Tenant Magic
+
+**The app automatically supports multiple NationBuilder instances!** Here's the magic:
+
+- **Automatic Detection**: When NationBuilder redirects users back, it includes a `nation` parameter (e.g., `nation=myorg`)
+- **Per-User Storage**: Each user's tokens and nation URL are stored separately by session ID
+- **Isolated API Calls**: Each user's API calls automatically go to their specific NationBuilder instance
+- **No Configuration Needed**: Users don't need to enter their nation slug - it's detected automatically
+
+**Example:**
+- User from `myorg.nationbuilder.com` connects → API calls go to `https://myorg.nationbuilder.com/api/v2/signups/me`
+- User from `anotherorg.nationbuilder.com` connects → API calls go to `https://anotherorg.nationbuilder.com/api/v2/signups/me`
+- Both users can use the same app instance simultaneously!
 
 ## Quick Start
 
@@ -188,7 +203,19 @@ heroku config:set TOKEN_STORE=redis
 This gives you:
 - **Persistent storage**: Tokens survive app restarts
 - **Multiple users**: Each user's tokens are stored separately
+- **Multi-tenant support**: Users from different NationBuilder instances
 - **Scaling**: Multiple app instances can share the same token store
+
+### Multi-Tenant Architecture
+
+With Redis enabled, the app becomes truly multi-tenant:
+
+- **User A** from `org1.nationbuilder.com` → Stored in Redis with session ID
+- **User B** from `org2.nationbuilder.com` → Stored in Redis with different session ID  
+- **User C** from `org3.nationbuilder.com` → Stored in Redis with different session ID
+- **All users** can connect simultaneously to the same app instance
+- **Each user's** API calls go to their specific NationBuilder instance
+- **Perfect for SaaS** applications serving multiple organizations
 
 ## Common Issues
 
@@ -216,9 +243,12 @@ Check that:
 ### API calls return 404
 
 Verify that:
-- `NB_BASE_URL` uses your correct NationBuilder subdomain
+- `NB_BASE_URL` uses your correct NationBuilder subdomain (for fallback)
 - Your NationBuilder account has API access enabled
 - The `/api/v2/signups/me` endpoint is available
+- The `nation` parameter is being passed correctly in the OAuth callback
+
+**Note**: The app automatically detects the nation from the OAuth callback, so users don't need to manually enter their nation slug.
 
 ## Extending This App
 
