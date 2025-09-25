@@ -49,8 +49,7 @@ def oauth_client
     client_id: ENV['NB_CLIENT_ID'],
     client_secret: ENV['NB_CLIENT_SECRET'],
     redirect_uri: ENV['NB_REDIRECT_URI'],
-    auth_base: ENV['NB_AUTH_BASE'],
-    api_base: ENV['NB_API_BASE'],
+    base_url: ENV['NB_BASE_URL'],
     scopes: ENV['NB_SCOPES']
   )
 end
@@ -58,7 +57,7 @@ end
 # Initialize NationBuilder API client
 def nb_api
   @nb_api ||= NbApi.new(
-    api_base: ENV['NB_API_BASE'],
+    base_url: ENV['NB_BASE_URL'],
     token_store: token_store,
     session_id: session.id
   )

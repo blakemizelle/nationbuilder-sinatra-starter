@@ -6,12 +6,11 @@ require 'json'
 class OAuthClient
   include HTTParty
 
-  def initialize(client_id:, client_secret: nil, redirect_uri:, auth_base:, api_base:, scopes:)
+  def initialize(client_id:, client_secret: nil, redirect_uri:, base_url:, scopes:)
     @client_id = client_id
     @client_secret = client_secret
     @redirect_uri = redirect_uri
-    @auth_base = auth_base
-    @api_base = api_base
+    @base_url = base_url
     @scopes = scopes
   end
 
@@ -39,7 +38,7 @@ class OAuthClient
     }
 
     query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join('&')
-    "#{@auth_base}/oauth/authorize?#{query_string}"
+    "#{@base_url}/oauth/authorize?#{query_string}"
   end
 
   # Exchange authorization code for tokens
@@ -56,7 +55,7 @@ class OAuthClient
     body[:client_secret] = @client_secret if @client_secret
 
     response = self.class.post(
-      "#{@auth_base}/oauth/token",
+      "#{@base_url}/oauth/token",
       body: body,
       headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
     )
@@ -83,7 +82,7 @@ class OAuthClient
     body[:client_secret] = @client_secret if @client_secret
 
     response = self.class.post(
-      "#{@auth_base}/oauth/token",
+      "#{@base_url}/oauth/token",
       body: body,
       headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
     )

@@ -29,8 +29,7 @@ task :check_env do
     SESSION_SECRET
     NB_CLIENT_ID
     NB_REDIRECT_URI
-    NB_AUTH_BASE
-    NB_API_BASE
+    NB_BASE_URL
     NB_SCOPES
   ]
   

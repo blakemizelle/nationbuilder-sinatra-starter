@@ -4,8 +4,8 @@ require 'json'
 class NbApi
   include HTTParty
 
-  def initialize(api_base:, token_store:, session_id:)
-    @api_base = api_base
+  def initialize(base_url:, token_store:, session_id:)
+    @base_url = base_url
     @token_store = token_store
     @session_id = session_id
   end
@@ -29,7 +29,7 @@ class NbApi
       'Accept' => 'application/json'
     }
 
-    url = "#{@api_base}#{path}"
+    url = "#{@base_url}#{path}"
     
     case method.to_s.upcase
     when 'GET'
@@ -89,8 +89,7 @@ class NbApi
         client_id: ENV['NB_CLIENT_ID'],
         client_secret: ENV['NB_CLIENT_SECRET'],
         redirect_uri: ENV['NB_REDIRECT_URI'],
-        auth_base: ENV['NB_AUTH_BASE'],
-        api_base: ENV['NB_API_BASE'],
+        base_url: ENV['NB_BASE_URL'],
         scopes: ENV['NB_SCOPES']
       )
 
