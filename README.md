@@ -44,10 +44,12 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
    NB_CLIENT_SECRET=your-nationbuilder-client-secret
    NB_REDIRECT_URI=http://localhost:4567/oauth/callback
    NB_AUTH_BASE=https://auth.nationbuilder.com
-   NB_API_BASE=https://api.nationbuilder.com
+   NB_API_BASE=https://YOUR-NATION-SLUG.nationbuilder.com
    NB_SCOPES=read write
    TOKEN_STORE=memory
    ```
+   
+   **Important**: Replace `YOUR-NATION-SLUG` with your actual NationBuilder nation slug (the subdomain of your NationBuilder site).
 
 4. **Register an OAuth app in NationBuilder**
    - Go to your NationBuilder admin panel
@@ -119,7 +121,7 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
 | `NB_CLIENT_SECRET` | NationBuilder OAuth client secret | `def456...` |
 | `NB_REDIRECT_URI` | OAuth callback URL | `http://localhost:4567/oauth/callback` |
 | `NB_AUTH_BASE` | NationBuilder auth endpoint | `https://auth.nationbuilder.com` |
-| `NB_API_BASE` | NationBuilder API endpoint | `https://api.nationbuilder.com` |
+| `NB_API_BASE` | NationBuilder API endpoint | `https://YOUR-NATION-SLUG.nationbuilder.com` |
 | `NB_SCOPES` | OAuth scopes | `read write` |
 | `TOKEN_STORE` | Token storage backend | `memory` or `redis` |
 
