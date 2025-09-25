@@ -65,8 +65,12 @@ end
 
 # Initialize NationBuilder API client
 def nb_api
+  # Get the user's nation URL from their stored data
+  user_data = token_store.get_user_data(session.id.to_s)
+  nation_url = user_data&.dig('nation_url') || ENV['NB_BASE_URL']
+  
   @nb_api ||= NbApi.new(
-    base_url: ENV['NB_BASE_URL'],
+    base_url: nation_url,
     token_store: token_store,
     session_id: session.id.to_s
   )
@@ -148,8 +152,16 @@ get '/oauth/callback' do
       halt 500, "Invalid token response from NationBuilder"
     end
 
-    # Store tokens
+    # Store tokens and nation URL
     token_store.store_tokens(session.id.to_s, tokens)
+    
+    # Extract nation URL from the callback (NationBuilder includes it)
+    nation_url = params[:nation] ? "https://#{params[:nation]}.nationbuilder.com" : ENV['NB_BASE_URL']
+    user_data = {
+      nation_url: nation_url,
+      nation_slug: params[:nation] || ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
+    }
+    token_store.store_user_data(session.id.to_s, user_data)
 
     # Clear session data
     session.delete(:oauth_state)
@@ -179,10 +191,14 @@ get '/status' do
     # Extract user display name from signup info
     user_display_name = signup_info['username'] || signup_info['full_name'] || 'Connected User'
 
+    # Get user's nation info
+    user_data = token_store.get_user_data(session.id.to_s)
+    nation_slug = user_data&.dig('nation_slug') || ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
+
     erb :status, locals: {
       tokens: tokens,
       user_display_name: user_display_name,
-      nation_slug: ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
+      nation_slug: nation_slug
     }
   rescue => e
     puts "Status page error: #{e.message}"

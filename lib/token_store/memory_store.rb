@@ -4,6 +4,7 @@ require_relative 'token_store'
 class MemoryStore < TokenStore
   def initialize
     @tokens = {}
+    @user_data = {}
   end
 
   def store_tokens(session_id, tokens)
@@ -16,5 +17,14 @@ class MemoryStore < TokenStore
 
   def clear_tokens(session_id)
     @tokens.delete(session_id)
+    @user_data.delete(session_id)
+  end
+
+  def store_user_data(session_id, user_data)
+    @user_data[session_id] = user_data.dup
+  end
+
+  def get_user_data(session_id)
+    @user_data[session_id]
   end
 end

@@ -25,13 +25,33 @@ class RedisStore < TokenStore
   end
 
   def clear_tokens(session_id)
-    key = token_key(session_id)
-    @redis.del(key)
+    token_key = token_key(session_id)
+    user_data_key = user_data_key(session_id)
+    @redis.del(token_key, user_data_key)
+  end
+
+  def store_user_data(session_id, user_data)
+    key = user_data_key(session_id)
+    @redis.setex(key, 86400, user_data.to_json) # 24 hour TTL
+  end
+
+  def get_user_data(session_id)
+    key = user_data_key(session_id)
+    data = @redis.get(key)
+    return nil unless data
+    
+    JSON.parse(data)
+  rescue JSON::ParserError
+    nil
   end
 
   private
 
   def token_key(session_id)
     "nb_tokens:#{session_id}"
+  end
+
+  def user_data_key(session_id)
+    "nb_user_data:#{session_id}"
   end
 end

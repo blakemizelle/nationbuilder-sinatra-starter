@@ -12,6 +12,14 @@ class TokenStore
     raise NotImplementedError, "Subclasses must implement clear_tokens"
   end
 
+  def store_user_data(session_id, user_data)
+    raise NotImplementedError, "Subclasses must implement store_user_data"
+  end
+
+  def get_user_data(session_id)
+    raise NotImplementedError, "Subclasses must implement get_user_data"
+  end
+
   def token_expired?(tokens)
     return true unless tokens && tokens['expires_at']
     
