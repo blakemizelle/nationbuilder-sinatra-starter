@@ -1,24 +1,66 @@
-<div class="status-card">
-    <h3>NationBuilder API Status</h3>
-    <p>Successfully connected to NationBuilder!</p>
+<div class="status-header">
+    <div class="logo-container">
+        <img src="/images/Mark.svg" alt="NationBuilder" class="nb-logo">
+    </div>
+    <div class="status-content">
+        <h2>Connected to NationBuilder</h2>
+        <p class="success-message">✓ Your OAuth integration is working perfectly!</p>
+    </div>
 </div>
 
-<div class="status-card">
-    <h3>Connection Details</h3>
-    <p><strong>User:</strong> <%= user_display_name %></p>
-    <p><strong>Nation:</strong> <%= nation_slug %></p>
-    <p><strong>Token Type:</strong> <%= tokens['token_type'] %></p>
-    <p><strong>Last Auth:</strong> <%= Time.at(tokens['expires_at'] - tokens['expires_in'].to_i).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
+<div class="connection-details">
+    <h3>Connection Information</h3>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">User</span>
+            <span class="detail-value"><%= user_display_name %></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Nation</span>
+            <span class="detail-value"><%= nation_slug %></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Token Type</span>
+            <span class="detail-value"><%= tokens['token_type'] %></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Connected</span>
+            <span class="detail-value"><%= Time.at(tokens['expires_at'] - tokens['expires_in'].to_i).strftime('%B %d, %Y at %I:%M %p') %></span>
+        </div>
+    </div>
 </div>
 
-<div class="status-card">
-    <h3>Next Steps</h3>
-    <p>Now that you have a working OAuth integration, you can:</p>
-    <ul>
-        <li>Extend the API calls to fetch more NationBuilder data</li>
-        <li>Implement Redis token storage for production</li>
-        <li>Add webhook handling for real-time updates</li>
-        <li>Deploy to Heroku or another platform</li>
-        <li>Add error handling and logging</li>
-    </ul>
+<div class="next-steps">
+    <h3>Ready to Build</h3>
+    <p>Your NationBuilder OAuth integration is complete. Here's what you can do next:</p>
+    <div class="steps-grid">
+        <div class="step-item">
+            <div class="step-icon">🔗</div>
+            <div class="step-content">
+                <h4>Extend API Calls</h4>
+                <p>Add more NationBuilder endpoints to fetch additional data</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-icon">🚀</div>
+            <div class="step-content">
+                <h4>Deploy to Production</h4>
+                <p>Use Redis for token storage and deploy to Heroku</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-icon">⚡</div>
+            <div class="step-content">
+                <h4>Add Webhooks</h4>
+                <p>Receive real-time updates from NationBuilder</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-icon">🏗️</div>
+            <div class="step-content">
+                <h4>Build Your App</h4>
+                <p>Create the features your users need</p>
+            </div>
+        </div>
+    </div>
 </div>
