@@ -82,6 +82,14 @@ end
 # Initiate OAuth login
 get '/login' do
   begin
+    # Validate required environment variables
+    required_vars = %w[NB_CLIENT_ID NB_BASE_URL NB_REDIRECT_URI NB_SCOPES]
+    missing_vars = required_vars.select { |var| ENV[var].nil? || ENV[var].empty? }
+    
+    if missing_vars.any?
+      halt 500, "Missing required environment variables: #{missing_vars.join(', ')}"
+    end
+
     # Generate state for CSRF protection
     state = SecureRandom.hex(32)
     session[:oauth_state] = state
@@ -98,28 +106,47 @@ get '/login' do
 
     redirect auth_url
   rescue => e
+    puts "OAuth login error: #{e.message}"
+    puts "Backtrace: #{e.backtrace.first(3)}"
     halt 500, "Login failed: #{e.message}"
   end
 end
 
 # OAuth callback
 get '/oauth/callback' do
-  # Verify state parameter
-  if params[:state] != session[:oauth_state]
-    halt 400, "Invalid state parameter"
-  end
-
-  # Check for error
-  if params[:error]
-    halt 400, "OAuth error: #{params[:error]} - #{params[:error_description]}"
-  end
-
-  # Exchange code for tokens
   begin
+    # Verify state parameter
+    if params[:state] != session[:oauth_state]
+      puts "Invalid state parameter. Expected: #{session[:oauth_state]}, Got: #{params[:state]}"
+      halt 400, "Invalid state parameter - possible CSRF attack"
+    end
+
+    # Check for OAuth errors from NationBuilder
+    if params[:error]
+      error_desc = params[:error_description] || 'No description provided'
+      puts "OAuth error from NationBuilder: #{params[:error]} - #{error_desc}"
+      halt 400, "OAuth error: #{params[:error]} - #{error_desc}"
+    end
+
+    # Validate required parameters
+    if params[:code].nil? || params[:code].empty?
+      halt 400, "Missing authorization code"
+    end
+
+    if session[:code_verifier].nil?
+      halt 400, "Missing code verifier - session may have expired"
+    end
+
+    # Exchange code for tokens
     tokens = oauth_client.exchange_code_for_tokens(
       code: params[:code],
       code_verifier: session[:code_verifier]
     )
+
+    # Validate token response
+    if tokens.nil? || tokens['access_token'].nil?
+      halt 500, "Invalid token response from NationBuilder"
+    end
 
     # Store tokens
     token_store.store_tokens(session.id.to_s, tokens)
@@ -130,19 +157,22 @@ get '/oauth/callback' do
 
     redirect '/status'
   rescue => e
-    halt 500, "Token exchange failed: #{e.message}"
+    puts "OAuth callback error: #{e.message}"
+    puts "Backtrace: #{e.backtrace.first(3)}"
+    halt 500, "Authentication failed: #{e.message}"
   end
 end
 
 # Status page - shows API data
 get '/status' do
-  tokens = token_store.get_tokens(session.id.to_s)
-  
-  if tokens.nil?
-    redirect '/'
-  end
-
   begin
+    tokens = token_store.get_tokens(session.id.to_s)
+    
+    if tokens.nil?
+      puts "No tokens found for session #{session.id}"
+      redirect '/'
+    end
+
     # Get signup info from NationBuilder
     signup_info = nb_api.get_signup_info
 
@@ -155,6 +185,9 @@ get '/status' do
       nation_slug: ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
     }
   rescue => e
+    puts "Status page error: #{e.message}"
+    puts "Backtrace: #{e.backtrace.first(3)}"
+    
     # If API call fails, clear tokens and redirect to login
     token_store.clear_tokens(session.id.to_s)
     redirect '/'
@@ -177,5 +210,35 @@ end
 # Error handlers
 error 400..599 do
   content_type :json
-  { error: true, message: env['sinatra.error']&.message || 'An error occurred' }.to_json
+  error_message = env['sinatra.error']&.message || 'An error occurred'
+  
+  # Log error details for debugging
+  puts "ERROR #{response.status}: #{error_message}"
+  puts "Request path: #{request.path}"
+  puts "Request method: #{request.request_method}"
+  
+  { 
+    error: true, 
+    message: error_message,
+    status: response.status,
+    timestamp: Time.now.iso8601
+  }.to_json
+end
+
+# Global error handler for unhandled exceptions
+error do
+  error_message = env['sinatra.error']&.message || 'Internal server error'
+  
+  # Log full error details
+  puts "UNHANDLED ERROR: #{error_message}"
+  puts "Backtrace: #{env['sinatra.error']&.backtrace&.first(5)}"
+  puts "Request: #{request.request_method} #{request.path}"
+  
+  content_type :json
+  { 
+    error: true, 
+    message: 'An unexpected error occurred',
+    status: 500,
+    timestamp: Time.now.iso8601
+  }.to_json
 end
