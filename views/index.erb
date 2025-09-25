@@ -1,0 +1,37 @@
+<div class="status-card">
+    <h3>Welcome to NationBuilder Sinatra Starter</h3>
+    <p>This is a minimal Sinatra application that demonstrates NationBuilder OAuth 2.0 authentication with PKCE (Proof Key for Code Exchange).</p>
+    
+    <h4>Features:</h4>
+    <ul>
+        <li>OAuth 2.0 Authorization Code flow with PKCE</li>
+        <li>Automatic token refresh</li>
+        <li>Secure token storage</li>
+        <li>Simple NationBuilder API integration</li>
+        <li>Heroku-ready deployment</li>
+    </ul>
+
+    <% if token_store.get_tokens(session.id) %>
+        <div class="success">
+            <strong>✓ Connected!</strong> You are authenticated with NationBuilder.
+        </div>
+        <p><a href="/status" class="button">View API Status</a></p>
+    <% else %>
+        <p>Click the button below to connect your NationBuilder account:</p>
+        <p><a href="/login" class="button">Connect to NationBuilder</a></p>
+    <% end %>
+</div>
+
+<div class="status-card">
+    <h3>Configuration</h3>
+    <p>Make sure you have configured the following environment variables:</p>
+    <ul>
+        <li><code>NB_CLIENT_ID</code> - Your NationBuilder OAuth client ID</li>
+        <li><code>NB_CLIENT_SECRET</code> - Your NationBuilder OAuth client secret (optional for PKCE-only)</li>
+        <li><code>NB_REDIRECT_URI</code> - OAuth callback URL</li>
+        <li><code>NB_AUTH_BASE</code> - NationBuilder auth endpoint</li>
+        <li><code>NB_API_BASE</code> - NationBuilder API endpoint</li>
+        <li><code>NB_SCOPES</code> - OAuth scopes (e.g., "read write")</li>
+        <li><code>SESSION_SECRET</code> - Secret key for session encryption</li>
+    </ul>
+</div>

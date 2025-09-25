@@ -1,0 +1,42 @@
+<div class="status-card">
+    <h3>NationBuilder API Status</h3>
+    <p>Successfully connected to NationBuilder! Here's the data from your account:</p>
+</div>
+
+<div class="status-card">
+    <h3>Account Information</h3>
+    <pre><%= JSON.pretty_generate(account_info) %></pre>
+</div>
+
+<div class="status-card">
+    <h3>Site Information</h3>
+    <pre><%= JSON.pretty_generate(site_info) %></pre>
+</div>
+
+<div class="status-card">
+    <h3>Token Information</h3>
+    <p><strong>Token Status:</strong> 
+        <% if token_store.token_expired?(tokens) %>
+            <span style="color: #e74c3c;">Expired</span>
+        <% elsif token_store.token_expires_soon?(tokens) %>
+            <span style="color: #f39c12;">Expires Soon</span>
+        <% else %>
+            <span style="color: #27ae60;">Valid</span>
+        <% end %>
+    </p>
+    <p><strong>Expires:</strong> <%= Time.at(tokens['expires_at']).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
+    <p><strong>Token Type:</strong> <%= tokens['token_type'] %></p>
+    <p><strong>Scope:</strong> <%= tokens['scope'] %></p>
+</div>
+
+<div class="status-card">
+    <h3>Next Steps</h3>
+    <p>Now that you have a working OAuth integration, you can:</p>
+    <ul>
+        <li>Extend the API calls to fetch more NationBuilder data</li>
+        <li>Implement Redis token storage for production</li>
+        <li>Add webhook handling for real-time updates</li>
+        <li>Deploy to Heroku or another platform</li>
+        <li>Add error handling and logging</li>
+    </ul>
+</div>
