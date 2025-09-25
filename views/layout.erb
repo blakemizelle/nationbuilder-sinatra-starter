@@ -121,9 +121,6 @@
             <p><strong>Expires:</strong> <%= Time.at(tokens['expires_at']).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
             <p><strong>Nation:</strong> <%= ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '') %></p>
             <p><strong>Scope:</strong> <%= tokens['scope'] %></p>
-            <% if defined?(user_name) && user_name %>
-                <p><strong>User:</strong> <%= user_name %></p>
-            <% end %>
         </div>
     <% end %>
 

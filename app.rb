@@ -132,13 +132,18 @@ get '/status' do
   begin
     # Get account info from NationBuilder
     account_info = nb_api.get_account_info
+    signup_info = nb_api.get_signup_info
     site_info = nb_api.get_site_info
+
+    # Extract user display name from signup info
+    user_display_name = signup_info['username'] || signup_info['full_name'] || 'Unknown User'
 
     erb :status, locals: {
       account_info: account_info,
+      signup_info: signup_info,
       site_info: site_info,
       tokens: tokens,
-      user_name: account_info['first_name'] && account_info['last_name'] ? "#{account_info['first_name']} #{account_info['last_name']}" : account_info['email'],
+      user_display_name: user_display_name,
       nation_slug: ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
     }
   rescue => e

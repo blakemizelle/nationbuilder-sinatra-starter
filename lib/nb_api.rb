@@ -75,6 +75,11 @@ class NbApi
     authenticated_request(method: 'GET', path: '/v2/me')
   end
 
+  # Get signup information (NationBuilder term for user)
+  def get_signup_info
+    authenticated_request(method: 'GET', path: '/v2/signups/me')
+  end
+
   # Get site information
   def get_site_info
     authenticated_request(method: 'GET', path: '/v2/sites/me')

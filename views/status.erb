@@ -4,6 +4,11 @@
 </div>
 
 <div class="status-card">
+    <h3>Signup Information (v2 API)</h3>
+    <pre><%= JSON.pretty_generate(signup_info) %></pre>
+</div>
+
+<div class="status-card">
     <h3>Account Information (v2 API)</h3>
     <pre><%= JSON.pretty_generate(account_info) %></pre>
 </div>
@@ -15,7 +20,7 @@
 
 <div class="status-card">
     <h3>Connection Details</h3>
-    <p><strong>User:</strong> <%= user_name %></p>
+    <p><strong>User:</strong> <%= user_display_name %></p>
     <p><strong>Nation:</strong> <%= nation_slug %></p>
     <p><strong>Token Type:</strong> <%= tokens['token_type'] %></p>
     <p><strong>Last Auth:</strong> <%= Time.at(tokens['expires_at'] - tokens['expires_in'].to_i).strftime('%Y-%m-%d %H:%M:%S UTC') %></p>
