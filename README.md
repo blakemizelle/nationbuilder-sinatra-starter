@@ -1,204 +1,258 @@
 # NationBuilder Sinatra Starter
 
-A reference implementation of NationBuilder OAuth 2.0 authentication using the Authorization Code flow with PKCE (Proof Key for Code Exchange). This application demonstrates secure token handling, automatic refresh, and integration with NationBuilder's v2 API.
+A working example of how to connect to NationBuilder using OAuth 2.0 authentication. This app shows you how to securely log users into NationBuilder and make API calls to get their information.
 
-## Architecture
+## What This Does
 
-### OAuth 2.0 Implementation
+This app demonstrates:
+- **OAuth Login**: Users can connect their NationBuilder account
+- **Secure Token Handling**: Automatically manages access tokens and refresh
+- **API Integration**: Makes calls to NationBuilder's API to get user data
+- **Production Ready**: Can be deployed to Heroku with Redis for scaling
 
-The application implements RFC 7636 PKCE for public clients:
+## How It Works
 
-- **Code Verifier**: Cryptographically random string (43-128 characters)
-- **Code Challenge**: SHA256 hash of verifier, base64url encoded
-- **State Parameter**: CSRF protection using SecureRandom.hex(32)
-- **Token Storage**: Session-based with automatic refresh
+1. User clicks "Connect to NationBuilder"
+2. They're redirected to NationBuilder to authorize your app
+3. NationBuilder sends them back with an authorization code
+4. Your app exchanges that code for access tokens
+5. You can now make API calls to get their NationBuilder data
 
-### Token Management
+The app uses PKCE (Proof Key for Code Exchange) for security, which is the modern standard for OAuth apps.
 
-- **Storage**: In-memory hash with Redis interface for production scaling
-- **Refresh**: Automatic refresh when tokens expire within 30 seconds
-- **Security**: Tokens never logged or exposed to client-side JavaScript
-- **Session Handling**: Uses `session.id.to_s` for consistent key generation
+## Quick Start
 
-### API Integration
+### 1. Get NationBuilder Credentials
 
-- **Endpoint**: `/api/v2/signups/me` - Returns authenticated user's signup data
-- **Authentication**: Bearer token in Authorization header
-- **Error Handling**: 401 responses trigger token refresh, failed refresh clears session
+First, you need to create an OAuth app in NationBuilder:
 
-## Implementation Details
+1. Go to your NationBuilder admin panel
+2. Navigate to **Settings → API**
+3. Click **"Create OAuth Application"**
+4. Set the **Redirect URI** to: `http://localhost:4567/oauth/callback`
+5. Copy the **Client ID** and **Client Secret**
 
-### Core Components
-
-**OAuthClient** (`lib/oauth_client.rb`)
-- Generates PKCE code verifier/challenge pairs
-- Builds authorization URLs with proper parameters
-- Exchanges authorization codes for access/refresh tokens
-- Handles token refresh requests
-
-**NbApi** (`lib/nb_api.rb`)
-- Makes authenticated requests to NationBuilder API
-- Implements automatic token refresh on 401 responses
-- Handles token expiration detection and refresh
-
-**TokenStore** (`lib/token_store/`)
-- Abstract interface for token storage
-- MemoryStore: In-memory hash for development
-- RedisStore: Redis-based storage for production scaling
-
-### Session Security
-
-```ruby
-configure :production do
-  set :session_cookie_options, {
-    secure: true,
-    httponly: true,
-    same_site: :lax
-  }
-end
-```
-
-### Environment Configuration
-
-Required variables:
-- `SESSION_SECRET`: Cryptographically secure session encryption key
-- `NB_CLIENT_ID`: NationBuilder OAuth application client ID
-- `NB_CLIENT_SECRET`: OAuth client secret (optional for PKCE-only)
-- `NB_REDIRECT_URI`: OAuth callback URL
-- `NB_BASE_URL`: NationBuilder instance URL (e.g., `https://your-nation.nationbuilder.com`)
-- `NB_SCOPES`: OAuth scopes (typically `default`)
-- `TOKEN_STORE`: Storage backend (`memory` or `redis`)
-
-## Setup
-
-### Prerequisites
-
-- Ruby 3.4+
-- Bundler
-- NationBuilder account with OAuth application
-
-### Installation
+### 2. Set Up the App
 
 ```bash
+# Clone the repository
 git clone https://github.com/blakemizelle/nationbuilder-sinatra-starter.git
 cd nationbuilder-sinatra-starter
+
+# Install dependencies
 bundle install
+
+# Copy the example environment file
 cp .env.example .env
 ```
 
-### Configuration
+### 3. Configure Environment Variables
 
-1. **NationBuilder OAuth App Setup**
-   - Navigate to Settings → API in NationBuilder admin
-   - Create OAuth application
-   - Set redirect URI: `http://localhost:4567/oauth/callback`
-   - Copy Client ID and Secret to `.env`
+Edit the `.env` file with your NationBuilder credentials:
 
-2. **Environment Variables**
-   ```env
-   SESSION_SECRET=your-cryptographically-secure-key
-   NB_CLIENT_ID=your-client-id
-   NB_CLIENT_SECRET=your-client-secret
-   NB_REDIRECT_URI=http://localhost:4567/oauth/callback
-   NB_BASE_URL=https://your-nation.nationbuilder.com
-   NB_SCOPES=default
-   TOKEN_STORE=memory
-   ```
+```env
+# Session secret - use a random string
+SESSION_SECRET=your-random-secret-key-here
 
-3. **Run Application**
-   ```bash
-   ruby app.rb
-   ```
+# NationBuilder OAuth credentials
+NB_CLIENT_ID=your-client-id-from-nationbuilder
+NB_CLIENT_SECRET=your-client-secret-from-nationbuilder
+NB_REDIRECT_URI=http://localhost:4567/oauth/callback
+NB_BASE_URL=https://your-nation-slug.nationbuilder.com
+NB_SCOPES=default
 
-## API Endpoints
+# Token storage (memory is fine for development)
+TOKEN_STORE=memory
+```
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/` | GET | Home page with connection status |
-| `/login` | GET | Initiates OAuth flow with PKCE |
-| `/oauth/callback` | GET | Handles OAuth callback and token exchange |
-| `/status` | GET | Displays connection status and user info |
-| `/logout` | GET | Clears session and stored tokens |
-| `/health` | GET | Health check endpoint |
+**Important**: Replace `your-nation-slug` with your actual NationBuilder subdomain (the part before `.nationbuilder.com` in your NationBuilder URL).
 
-## Production Deployment
+### 4. Run the App
 
-### Heroku Deployment
+```bash
+ruby app.rb
+```
+
+Visit `http://localhost:4567` and click "Connect to NationBuilder" to test the OAuth flow.
+
+## File Structure
+
+```
+nationbuilder-sinatra-starter/
+├── app.rb                    # Main Sinatra application
+├── config.ru                 # Rack configuration
+├── Gemfile                   # Ruby dependencies
+├── Procfile                  # Heroku deployment config
+├── .env.example              # Environment variables template
+├── lib/
+│   ├── oauth_client.rb       # Handles OAuth flow
+│   ├── nb_api.rb             # Makes API calls to NationBuilder
+│   └── token_store/
+│       ├── token_store.rb    # Interface for storing tokens
+│       └── memory_store.rb   # Stores tokens in memory
+└── views/
+    ├── layout.erb            # Base HTML template
+    ├── index.erb             # Home page
+    └── status.erb            # Shows connection status
+```
+
+## Understanding the Code
+
+### OAuth Flow (`lib/oauth_client.rb`)
+
+This handles the OAuth authentication:
+- Generates secure random codes for PKCE
+- Builds the authorization URL
+- Exchanges authorization codes for access tokens
+- Handles token refresh when they expire
+
+### API Client (`lib/nb_api.rb`)
+
+This makes authenticated requests to NationBuilder:
+- Adds Bearer tokens to API requests
+- Automatically refreshes tokens when they expire
+- Handles API errors gracefully
+
+### Token Storage (`lib/token_store/`)
+
+This manages where tokens are stored:
+- **MemoryStore**: Stores tokens in memory (good for development)
+- **RedisStore**: Stores tokens in Redis (good for production)
+
+## Environment Variables Explained
+
+| Variable | What It Does | Example |
+|----------|--------------|---------|
+| `SESSION_SECRET` | Encrypts user sessions | `my-super-secret-key` |
+| `NB_CLIENT_ID` | Your NationBuilder app ID | `abc123...` |
+| `NB_CLIENT_SECRET` | Your NationBuilder app secret | `def456...` |
+| `NB_REDIRECT_URI` | Where NationBuilder sends users back | `http://localhost:4567/oauth/callback` |
+| `NB_BASE_URL` | Your NationBuilder site URL | `https://myorg.nationbuilder.com` |
+| `NB_SCOPES` | What permissions to request | `default` |
+| `TOKEN_STORE` | How to store tokens | `memory` or `redis` |
+
+## Routes
+
+The app has these endpoints:
+
+- **`/`** - Home page with connect button
+- **`/login`** - Starts the OAuth flow
+- **`/oauth/callback`** - Handles NationBuilder's response
+- **`/status`** - Shows connection status and user info
+- **`/logout`** - Clears the connection
+- **`/health`** - Health check for monitoring
+
+## Deploying to Heroku
+
+### 1. Create Heroku App
 
 ```bash
 heroku create your-app-name
-heroku config:set SESSION_SECRET=your-production-secret
+```
+
+### 2. Set Environment Variables
+
+```bash
+heroku config:set SESSION_SECRET=your-production-secret-key
 heroku config:set NB_CLIENT_ID=your-client-id
 heroku config:set NB_CLIENT_SECRET=your-client-secret
 heroku config:set NB_REDIRECT_URI=https://your-app-name.herokuapp.com/oauth/callback
-heroku config:set NB_BASE_URL=https://your-nation.nationbuilder.com
+heroku config:set NB_BASE_URL=https://your-nation-slug.nationbuilder.com
 heroku config:set NB_SCOPES=default
 heroku config:set TOKEN_STORE=memory
-git push heroku main
 ```
 
-### Redis Token Storage
+### 3. Update NationBuilder
 
-For production scaling with multiple NationBuilder instances:
+In your NationBuilder OAuth app settings, change the redirect URI to:
+`https://your-app-name.herokuapp.com/oauth/callback`
+
+### 4. Deploy
+
+```bash
+git push heroku main
+heroku open
+```
+
+## Production Scaling with Redis
+
+For production apps that need to handle multiple users or multiple NationBuilder instances:
+
+### Add Redis to Heroku
 
 ```bash
 heroku addons:create heroku-redis:mini
 heroku config:set TOKEN_STORE=redis
 ```
 
-Benefits:
-- Persistent token storage across deployments
-- Shared token cache for horizontal scaling
-- Support for multiple NationBuilder instances
-- Automatic token refresh across server restarts
+This gives you:
+- **Persistent storage**: Tokens survive app restarts
+- **Multiple users**: Each user's tokens are stored separately
+- **Scaling**: Multiple app instances can share the same token store
 
-## Security Considerations
+## Common Issues
 
-- **PKCE**: Prevents authorization code interception attacks
-- **State Parameter**: CSRF protection for OAuth flow
-- **Session Security**: Secure, httponly cookies in production
-- **Token Handling**: No client-side exposure, automatic refresh
-- **Error Handling**: Failed authentication clears session
+### "Invalid redirect URI"
 
-## Troubleshooting
+Make sure the redirect URI in your NationBuilder OAuth app exactly matches what you set in `NB_REDIRECT_URI`. Check for:
+- `http` vs `https`
+- Trailing slashes
+- Port numbers
 
-### Common Issues
+### "Invalid state parameter"
 
-**Redirect URI Mismatch**
-- Ensure exact match between NationBuilder OAuth app and `NB_REDIRECT_URI`
-- Check for trailing slashes and protocol (http vs https)
+This usually means your session got corrupted. Try:
+- Clearing your browser cookies
+- Making sure `SESSION_SECRET` is set
+- Restarting the app
 
-**Invalid State Parameter**
-- Usually indicates session corruption or CSRF attack
-- Clear browser cookies and retry
-- Verify `SESSION_SECRET` is consistent
+### "Token refresh failed"
 
-**Token Refresh Failures**
-- Verify OAuth app has refresh token scope enabled
-- Check `NB_CLIENT_SECRET` accuracy
-- Ensure refresh token hasn't been revoked
+Check that:
+- Your OAuth app has refresh token permissions enabled
+- `NB_CLIENT_SECRET` is correct
+- The refresh token hasn't been revoked
 
-**API 404 Errors**
-- Confirm `NB_BASE_URL` uses correct nation slug
-- Verify NationBuilder account has API access enabled
-- Check that `/api/v2/signups/me` endpoint is available
+### API calls return 404
 
-## Development
+Verify that:
+- `NB_BASE_URL` uses your correct NationBuilder subdomain
+- Your NationBuilder account has API access enabled
+- The `/api/v2/signups/me` endpoint is available
 
-### Testing OAuth Flow
+## Extending This App
 
-1. Start application: `ruby app.rb`
-2. Visit `http://localhost:4567`
-3. Click "Connect to NationBuilder"
-4. Complete authorization on NationBuilder
-5. Verify redirect to `/status` with connection details
+### Adding More API Calls
 
-### Extending Functionality
+To call other NationBuilder endpoints, add methods to `lib/nb_api.rb`:
 
-- **Additional API Endpoints**: Add methods to `NbApi` class
-- **Webhook Handling**: Implement webhook receiver routes
-- **Database Storage**: Replace MemoryStore with database-backed implementation
-- **Multi-tenant Support**: Extend token storage for multiple organizations
+```ruby
+def get_people
+  authenticated_request(method: 'GET', path: '/api/v2/people')
+end
+```
+
+### Adding Webhooks
+
+To receive webhooks from NationBuilder, add routes to `app.rb`:
+
+```ruby
+post '/webhook' do
+  # Handle webhook data
+  "OK"
+end
+```
+
+### Using a Database
+
+Replace the memory token store with a database-backed version for better persistence.
+
+## Security Notes
+
+- **PKCE**: Prevents authorization code interception
+- **State Parameter**: Protects against CSRF attacks
+- **Secure Sessions**: Uses secure cookies in production
+- **Token Handling**: Never exposes tokens to the client side
 
 ## License
 
@@ -206,8 +260,11 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## Security
+## Getting Help
 
-Report security issues to [SECURITY.md](SECURITY.md).
+If you run into issues:
+1. Check the troubleshooting section above
+2. Look at the NationBuilder API documentation
+3. Open an issue on GitHub with details about your problem
