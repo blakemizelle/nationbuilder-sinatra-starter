@@ -1,6 +1,7 @@
 require 'httparty'
 require 'json'
 
+# NationBuilder v2 API client
 class NbApi
   include HTTParty
 
@@ -71,12 +72,12 @@ class NbApi
 
   # Get current user/account information
   def get_account_info
-    authenticated_request(method: 'GET', path: '/v1/me')
+    authenticated_request(method: 'GET', path: '/v2/me')
   end
 
   # Get site information
   def get_site_info
-    authenticated_request(method: 'GET', path: '/v1/sites/me')
+    authenticated_request(method: 'GET', path: '/v2/sites/me')
   end
 
   private

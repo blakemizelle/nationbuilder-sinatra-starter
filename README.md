@@ -1,13 +1,13 @@
 # NationBuilder Sinatra Starter
 
-A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authentication with PKCE (Proof Key for Code Exchange) and a simple API integration.
+A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authentication with PKCE (Proof Key for Code Exchange) and a simple v2 API integration.
 
 ## Features
 
 - **OAuth 2.0 Authorization Code flow with PKCE** - Secure authentication without exposing client secrets
 - **Automatic token refresh** - Handles token expiration seamlessly
 - **Secure token storage** - In-memory storage with Redis support ready
-- **Simple NationBuilder API integration** - Make authenticated API calls
+- **Simple NationBuilder v2 API integration** - Make authenticated API calls
 - **Heroku-ready deployment** - Includes Procfile and configuration
 - **12-factor app compliance** - Environment-based configuration
 
@@ -227,9 +227,10 @@ For production use with multiple NationBuilder instances, use Redis for token st
 - Ensure the refresh token hasn't been revoked
 
 ### API Calls Failing
-- Verify `NB_API_BASE` is correct for your NationBuilder instance
+- Verify `NB_BASE_URL` is correct for your NationBuilder instance
 - Check that the required scopes are granted
 - Ensure your NationBuilder account has API access enabled
+- Confirm you're using the v2 API endpoints (this app uses `/v2/me` and `/v2/sites/me`)
 
 ## License
 
