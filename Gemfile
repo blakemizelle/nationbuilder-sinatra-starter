@@ -7,6 +7,7 @@ gem 'rack', '~> 2.2'
 gem 'dotenv', '~> 2.8'
 gem 'httparty', '~> 0.21'
 gem 'securerandom', '~> 0.2'
+gem 'redis', '~> 5.0'
 
 group :development do
   gem 'foreman', '~> 0.87'

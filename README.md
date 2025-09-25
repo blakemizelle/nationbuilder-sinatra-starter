@@ -172,9 +172,38 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
 | `/logout` | GET | Clear session and tokens |
 | `/health` | GET | Health check endpoint |
 
+## Production Deployment with Redis
+
+For production use with multiple NationBuilder instances, use Redis for token storage:
+
+### Heroku with Redis
+
+1. **Add Heroku Redis addon**
+   ```bash
+   heroku addons:create heroku-redis:mini
+   ```
+
+2. **Set environment variables**
+   ```bash
+   heroku config:set TOKEN_STORE=redis
+   # REDIS_URL is automatically set by Heroku Redis addon
+   ```
+
+3. **Deploy**
+   ```bash
+   git push heroku main
+   ```
+
+### Benefits of Redis Token Storage
+
+- **Multi-instance support**: Multiple NationBuilder slugs can connect simultaneously
+- **Persistent storage**: Tokens survive app restarts and deployments
+- **Horizontal scaling**: Multiple app instances share token cache
+- **Automated refresh**: Token refresh works across server restarts
+- **Production ready**: Suitable for high-traffic applications
+
 ## Next Steps
 
-- **Redis Token Store**: Implement persistent token storage for production
 - **Webhook Handling**: Add webhook receiver for real-time updates
 - **Docker Support**: Add Dockerfile for containerized deployment
 - **Testing**: Add RSpec tests for OAuth flow and API integration

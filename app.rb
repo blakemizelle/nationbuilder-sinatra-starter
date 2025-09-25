@@ -5,6 +5,7 @@ require 'json'
 require_relative 'lib/oauth_client'
 require_relative 'lib/nb_api'
 require_relative 'lib/token_store/memory_store'
+require_relative 'lib/token_store/redis_store'
 
 # Load environment variables
 Dotenv.load
@@ -36,8 +37,7 @@ end
 def token_store
   @token_store ||= case ENV['TOKEN_STORE']
   when 'redis'
-    # TODO: Implement Redis store
-    MemoryStore.new
+    RedisStore.new(ENV['REDIS_URL'])
   else
     MemoryStore.new
   end
