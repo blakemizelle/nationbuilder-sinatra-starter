@@ -70,19 +70,9 @@ class NbApi
     end
   end
 
-  # Get current user/account information
-  def get_account_info
-    authenticated_request(method: 'GET', path: '/v2/me')
-  end
-
-  # Get signup information (NationBuilder term for user)
+  # Get signup information (NationBuilder term for authenticated user)
   def get_signup_info
-    authenticated_request(method: 'GET', path: '/v2/signups/me')
-  end
-
-  # Get site information
-  def get_site_info
-    authenticated_request(method: 'GET', path: '/v2/sites/me')
+    authenticated_request(method: 'GET', path: '/api/v2/signups/me')
   end
 
   private

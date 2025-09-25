@@ -33,13 +33,22 @@ configure :development do
   }
 end
 
-# Initialize token store
+# Global token store - simple and works
+$token_store = case ENV['TOKEN_STORE']
+when 'redis'
+  RedisStore.new(ENV['REDIS_URL'])
+else
+  MemoryStore.new
+end
+
 def token_store
-  @token_store ||= case ENV['TOKEN_STORE']
-  when 'redis'
-    RedisStore.new(ENV['REDIS_URL'])
-  else
-    MemoryStore.new
+  $token_store
+end
+
+# Make token_store available to views
+helpers do
+  def token_store
+    $token_store
   end
 end
 
@@ -59,7 +68,7 @@ def nb_api
   @nb_api ||= NbApi.new(
     base_url: ENV['NB_BASE_URL'],
     token_store: token_store,
-    session_id: session.id
+    session_id: session.id.to_s
   )
 end
 
@@ -72,21 +81,25 @@ end
 
 # Initiate OAuth login
 get '/login' do
-  # Generate state for CSRF protection
-  state = SecureRandom.hex(32)
-  session[:oauth_state] = state
+  begin
+    # Generate state for CSRF protection
+    state = SecureRandom.hex(32)
+    session[:oauth_state] = state
 
-  # Generate PKCE pair
-  pkce = oauth_client.generate_pkce_pair
-  session[:code_verifier] = pkce[:code_verifier]
+    # Generate PKCE pair
+    pkce = oauth_client.generate_pkce_pair
+    session[:code_verifier] = pkce[:code_verifier]
 
-  # Build authorization URL
-  auth_url = oauth_client.authorization_url(
-    state: state,
-    code_challenge: pkce[:code_challenge]
-  )
+    # Build authorization URL
+    auth_url = oauth_client.authorization_url(
+      state: state,
+      code_challenge: pkce[:code_challenge]
+    )
 
-  redirect auth_url
+    redirect auth_url
+  rescue => e
+    halt 500, "Login failed: #{e.message}"
+  end
 end
 
 # OAuth callback
@@ -109,7 +122,7 @@ get '/oauth/callback' do
     )
 
     # Store tokens
-    token_store.store_tokens(session.id, tokens)
+    token_store.store_tokens(session.id.to_s, tokens)
 
     # Clear session data
     session.delete(:oauth_state)
@@ -123,39 +136,34 @@ end
 
 # Status page - shows API data
 get '/status' do
-  tokens = token_store.get_tokens(session.id)
+  tokens = token_store.get_tokens(session.id.to_s)
   
   if tokens.nil?
     redirect '/'
   end
 
   begin
-    # Get account info from NationBuilder
-    account_info = nb_api.get_account_info
+    # Get signup info from NationBuilder
     signup_info = nb_api.get_signup_info
-    site_info = nb_api.get_site_info
 
     # Extract user display name from signup info
-    user_display_name = signup_info['username'] || signup_info['full_name'] || 'Unknown User'
+    user_display_name = signup_info['username'] || signup_info['full_name'] || 'Connected User'
 
     erb :status, locals: {
-      account_info: account_info,
-      signup_info: signup_info,
-      site_info: site_info,
       tokens: tokens,
       user_display_name: user_display_name,
       nation_slug: ENV['NB_BASE_URL'].gsub('https://', '').gsub('.nationbuilder.com', '')
     }
   rescue => e
     # If API call fails, clear tokens and redirect to login
-    token_store.clear_tokens(session.id)
+    token_store.clear_tokens(session.id.to_s)
     redirect '/'
   end
 end
 
 # Logout
 get '/logout' do
-  token_store.clear_tokens(session.id)
+  token_store.clear_tokens(session.id.to_s)
   session.clear
   redirect '/'
 end
