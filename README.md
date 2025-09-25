@@ -43,7 +43,7 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
    NB_CLIENT_ID=your-nationbuilder-client-id
    NB_CLIENT_SECRET=your-nationbuilder-client-secret
    NB_REDIRECT_URI=http://localhost:4567/oauth/callback
-   NB_AUTH_BASE=https://auth.nationbuilder.com
+   NB_AUTH_BASE=https://YOUR-NATION-SLUG.nationbuilder.com
    NB_API_BASE=https://YOUR-NATION-SLUG.nationbuilder.com
    NB_SCOPES=read write
    TOKEN_STORE=memory
@@ -120,7 +120,7 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
 | `NB_CLIENT_ID` | NationBuilder OAuth client ID | `abc123...` |
 | `NB_CLIENT_SECRET` | NationBuilder OAuth client secret | `def456...` |
 | `NB_REDIRECT_URI` | OAuth callback URL | `http://localhost:4567/oauth/callback` |
-| `NB_AUTH_BASE` | NationBuilder auth endpoint | `https://auth.nationbuilder.com` |
+| `NB_AUTH_BASE` | NationBuilder auth endpoint | `https://YOUR-NATION-SLUG.nationbuilder.com` |
 | `NB_API_BASE` | NationBuilder API endpoint | `https://YOUR-NATION-SLUG.nationbuilder.com` |
 | `NB_SCOPES` | OAuth scopes | `read write` |
 | `TOKEN_STORE` | Token storage backend | `memory` or `redis` |
@@ -144,8 +144,8 @@ A minimal Sinatra application demonstrating NationBuilder OAuth 2.0 authenticati
    heroku config:set NB_CLIENT_ID=your-client-id
    heroku config:set NB_CLIENT_SECRET=your-client-secret
    heroku config:set NB_REDIRECT_URI=https://your-app-name.herokuapp.com/oauth/callback
-   heroku config:set NB_AUTH_BASE=https://auth.nationbuilder.com
-   heroku config:set NB_API_BASE=https://api.nationbuilder.com
+   heroku config:set NB_AUTH_BASE=https://YOUR-NATION-SLUG.nationbuilder.com
+   heroku config:set NB_API_BASE=https://YOUR-NATION-SLUG.nationbuilder.com
    heroku config:set NB_SCOPES=read write
    heroku config:set TOKEN_STORE=memory
    ```
