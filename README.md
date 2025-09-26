@@ -292,9 +292,17 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
+## Official NationBuilder Documentation
+
+For comprehensive information about NationBuilder's API and authentication:
+
+- **[API Authentication Quick Start Guide](https://support.nationbuilder.com/en/articles/9180281-api-authentication-quick-start-guide)** - Official OAuth setup and authentication
+- **[API v2 Walkthrough](https://support.nationbuilder.com/en/articles/9899245-api-v2-walkthrough)** - Complete guide to NationBuilder's v2 API
+- **[Relationships between Resources in v2 API](https://support.nationbuilder.com/en/articles/9912495-relationships-between-resources-in-v2-api)** - Understanding data relationships and endpoints
+
 ## Getting Help
 
 If you run into issues:
 1. Check the troubleshooting section above
-2. Look at the NationBuilder API documentation
+2. Review the official NationBuilder documentation above
 3. Open an issue on GitHub with details about your problem
