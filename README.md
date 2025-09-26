@@ -263,6 +263,7 @@ end
 ```
 
 ### Adding Webhooks
+> Note: While the functionality remains in the application, NationBuilder has officially deprectaed support for webhooks as they can often be unreliable at scale
 
 To receive webhooks from NationBuilder, add routes to `app.rb`:
 
